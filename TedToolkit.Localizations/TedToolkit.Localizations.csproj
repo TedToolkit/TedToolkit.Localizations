@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\externals\TedToolkit\props\CodeAnalysis.props"/>
+  <Import Project="..\externals\TedToolkit\props\NugetPackage.props"/>
+  <Import Project="..\externals\TedToolkit\props\AlmostAllFrameworks.props"/>
+
+  <PropertyGroup>
+    <Title>Localizations</Title>
+    <Description>Make some localizations.</Description>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\TedToolkit.Localizations.Analyzer\bin\$(Configuration)\netstandard2.0\TedToolkit.Localizations.Analyzer.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="..\TedToolkit.Localizations.Analyzer\bin\$(Configuration)\netstandard2.0\TedToolkit.RoslynHelper.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="..\TedToolkit.Localizations.Analyzer\bin\$(Configuration)\netstandard2.0\Newtonsoft.Json.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="..\TedToolkit.Localizations.Analyzer\bin\$(Configuration)\netstandard2.0\ZString.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+    <None Include="..\TedToolkit.Localizations.Analyzer\bin\$(Configuration)\netstandard2.0\System.Memory.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+  </ItemGroup>
+</Project>

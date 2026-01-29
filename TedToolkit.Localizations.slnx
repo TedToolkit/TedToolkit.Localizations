@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="Build/Build.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
+  <Project Path="TedToolkit.Localizations.Analyzer/TedToolkit.Localizations.Analyzer.csproj" />
+  <Project Path="TedToolkit.Localizations.Benchmark/TedToolkit.Localizations.Benchmark.csproj">
+    <BuildDependency Project="TedToolkit.Localizations.Analyzer/TedToolkit.Localizations.Analyzer.csproj" />
+  </Project>
+  <Project Path="TedToolkit.Localizations/TedToolkit.Localizations.csproj">
+    <BuildDependency Project="TedToolkit.Localizations.Analyzer/TedToolkit.Localizations.Analyzer.csproj" />
+  </Project>
+</Solution>
