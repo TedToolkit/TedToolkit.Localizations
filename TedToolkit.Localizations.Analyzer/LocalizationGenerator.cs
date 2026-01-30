@@ -137,13 +137,14 @@ public class LocalizationGenerator : IIncrementalGenerator
                         continue;
                     }
 
-                    table.AddItem(new DescriptionText(keyValuePair.Key), new DescriptionText(valueString));
+                    table.AddItem(new DescriptionText(keyValuePair.Key),
+                        new DescriptionText(ToDescription(valueString)));
                     switchStatement.AddSection(new SwitchSection()
                         .AddLabel(new SwitchLabel(keyValuePair.Key.ToLiteral()))
                         .AddStatement(valueString.ToLiteral().Return));
                 }
 
-                table.AddItem(new DescriptionText("default"), new DescriptionText(stringValue));
+                table.AddItem(new DescriptionText("default"), new DescriptionText(ToDescription(stringValue)));
                 switchStatement.AddSection(new SwitchSection()
                     .AddLabel(new SwitchLabel())
                     .AddStatement("LocalizedStrings.TryGetValue".ToSimpleName().Invoke()
@@ -158,11 +159,14 @@ public class LocalizationGenerator : IIncrementalGenerator
 
             void AddMethodOrProperty()
             {
+                var summary = new DescriptionSummary(
+                    new DescriptionText(ZString.Concat("Gets the localized text for key: <c><b>", totalKey, "</b></c>.")),
+                    table);
                 var result = _argumentRegex.Matches(stringValue);
                 if (result.Count is 0)
                 {
                     declaration.AddMember(Property(DataType.String, key).Public.Static
-                        .AddRootDescription(new DescriptionSummary(table))
+                        .AddRootDescription(summary)
                         .AddAccessor(Accessor(AccessorType.GET)
                             .AddAttribute(Attribute<MethodImplAttribute>()
                                 .AddArgument(Argument(MethodImplOptions.AggressiveInlining.ToExpression())))
@@ -171,7 +175,7 @@ public class LocalizationGenerator : IIncrementalGenerator
                 else
                 {
                     var method = Method(key, new(DataType.String)).Public.Static
-                        .AddRootDescription(new DescriptionSummary(table))
+                        .AddRootDescription(summary)
                         .AddAttribute(Attribute<MethodImplAttribute>()
                             .AddArgument(Argument(MethodImplOptions.AggressiveInlining.ToExpression())));
                     IExpression returnExpression = methodName.ToSimpleName().Invoke();
@@ -194,4 +198,7 @@ public class LocalizationGenerator : IIncrementalGenerator
     }
 
     private static readonly Regex _argumentRegex = new(@"\{\{(.*?)\}\}");
+
+    private static string ToDescription(string value)
+        => value.Replace("{{", "<c><b>").Replace("}}", "</b></c>");
 }
