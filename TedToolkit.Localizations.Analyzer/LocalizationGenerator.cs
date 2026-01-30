@@ -119,6 +119,7 @@ public class LocalizationGenerator : IIncrementalGenerator
                                         && !string.IsNullOrEmpty(stringValue))
         {
             var methodName = ZString.Concat("Get", key);
+            var table = new DescriptionTable(new DescriptionText("Culture"), new DescriptionText("Text"));
             AddGetMethod();
             AddMethodOrProperty();
 
@@ -136,11 +137,13 @@ public class LocalizationGenerator : IIncrementalGenerator
                         continue;
                     }
 
+                    table.AddItem(new DescriptionText(keyValuePair.Key), new DescriptionText(valueString));
                     switchStatement.AddSection(new SwitchSection()
                         .AddLabel(new SwitchLabel(keyValuePair.Key.ToLiteral()))
                         .AddStatement(valueString.ToLiteral().Return));
                 }
 
+                table.AddItem(new DescriptionText("default"), new DescriptionText(stringValue));
                 switchStatement.AddSection(new SwitchSection()
                     .AddLabel(new SwitchLabel())
                     .AddStatement("LocalizedStrings.TryGetValue".ToSimpleName().Invoke()
@@ -159,6 +162,7 @@ public class LocalizationGenerator : IIncrementalGenerator
                 if (result.Count is 0)
                 {
                     declaration.AddMember(Property(DataType.String, key).Public.Static
+                        .AddRootDescription(new DescriptionSummary(table))
                         .AddAccessor(Accessor(AccessorType.GET)
                             .AddAttribute(Attribute<MethodImplAttribute>()
                                 .AddArgument(Argument(MethodImplOptions.AggressiveInlining.ToExpression())))
@@ -167,6 +171,7 @@ public class LocalizationGenerator : IIncrementalGenerator
                 else
                 {
                     var method = Method(key, new(DataType.String)).Public.Static
+                        .AddRootDescription(new DescriptionSummary(table))
                         .AddAttribute(Attribute<MethodImplAttribute>()
                             .AddArgument(Argument(MethodImplOptions.AggressiveInlining.ToExpression())));
                     IExpression returnExpression = methodName.ToSimpleName().Invoke();
