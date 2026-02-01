@@ -50,7 +50,8 @@ public class LocalizationGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(jsonFiles.Combine(assemblyNameProvider), Generate);
     }
 
-    private static void Generate(SourceProductionContext context, (ImmutableArray<AdditionalText> Left, string Right) item)
+    private static void Generate(SourceProductionContext context,
+        (ImmutableArray<AdditionalText> Left, string Right) item)
     {
         var (files, nameSpace) = item;
         var dict = new Dictionary<string, JObject>();
@@ -164,7 +165,8 @@ public class LocalizationGenerator : IIncrementalGenerator
             void AddMethodOrProperty()
             {
                 var summary = new DescriptionSummary(
-                    new DescriptionText(ZString.Concat("Gets the localized text for key: <c><b>", totalKey, "</b></c>.")),
+                    new DescriptionText(
+                        ZString.Concat("Gets the localized text for key: <c><b>", totalKey, "</b></c>.")),
                     table);
                 var result = _argumentRegex.Matches(stringValue);
                 if (result.Count is 0)
