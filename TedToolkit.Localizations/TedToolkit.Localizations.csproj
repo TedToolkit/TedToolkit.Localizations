@@ -7,8 +7,6 @@
   <PropertyGroup>
     <Title>Localizations</Title>
     <Description>Make some localizations.</Description>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
   <ItemGroup>

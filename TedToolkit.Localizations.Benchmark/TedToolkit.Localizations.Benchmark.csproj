@@ -19,4 +19,8 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TedToolkit.Localizations\TedToolkit.Localizations.csproj" />
+  </ItemGroup>
 </Project>
