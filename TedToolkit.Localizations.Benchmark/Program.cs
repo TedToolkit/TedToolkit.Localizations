@@ -1,9 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Globalization;
-using System.Text.RegularExpressions;
-
-using TedToolkit.Localizations;
+using TedToolkit.Localizations.Benchmark;
 
 Console.WriteLine("Hello, World!");
 
