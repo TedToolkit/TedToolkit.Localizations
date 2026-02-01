@@ -35,6 +35,9 @@ public class LocalizationGenerator : IIncrementalGenerator
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var assemblyNameProvider = context.CompilationProvider
+            .Select((compilation, _) => compilation.AssemblyName ?? "TedToolkit.Localizations");
+
         var jsonFiles = context.AdditionalTextsProvider
             .Where(file =>
             {
@@ -44,11 +47,12 @@ public class LocalizationGenerator : IIncrementalGenerator
             })
             .Collect();
 
-        context.RegisterSourceOutput(jsonFiles, Generate);
+        context.RegisterSourceOutput(jsonFiles.Combine(assemblyNameProvider), Generate);
     }
 
-    private static void Generate(SourceProductionContext context, ImmutableArray<AdditionalText> files)
+    private static void Generate(SourceProductionContext context, (ImmutableArray<AdditionalText> Left, string Right) item)
     {
+        var (files, nameSpace) = item;
         var dict = new Dictionary<string, JObject>();
         foreach (var additionalText in files)
         {
@@ -70,7 +74,7 @@ public class LocalizationGenerator : IIncrementalGenerator
 
         dict.Remove("");
 
-        var classDeclaration = Class("Localization").Public.Static
+        var classDeclaration = Class("Localization").Public.Static.Partial
             .AddMember(Property(DataType.String, "Culture").Public.Static
                 .AddAccessor(Accessor(AccessorType.GET))
                 .AddAccessor(Accessor(AccessorType.SET)
@@ -91,7 +95,7 @@ public class LocalizationGenerator : IIncrementalGenerator
         }
 
         File()
-            .AddNameSpace(NameSpace("TedToolkit.Localizations")
+            .AddNameSpace(NameSpace(nameSpace)
                 .AddMember(classDeclaration))
             .Generate(context, "Localization");
     }
