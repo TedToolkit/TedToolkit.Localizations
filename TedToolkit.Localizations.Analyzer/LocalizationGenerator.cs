@@ -75,17 +75,7 @@ public class LocalizationGenerator : IIncrementalGenerator
 
         dict.Remove("");
 
-        var classDeclaration = Class("Localization").Public.Static.Partial
-            .AddMember(Property(DataType.String, "Culture").Public.Static
-                .AddAccessor(Accessor(AccessorType.GET))
-                .AddAccessor(Accessor(AccessorType.SET)
-                    .AddStatement("field = value".ToSimpleName())
-                    .AddStatement("OnCultureChanged?.Invoke(value)".ToSimpleName()))
-                .AddDefault(DataType.FromType<CultureInfo>().Type.Sub("CurrentCulture").Sub("Name")))
-            .AddMember(Property(DataType.FromType<Dictionary<string, string>>(), "LocalizedStrings").Public.Static
-                .AddAccessor(Accessor(AccessorType.GET))
-                .AddDefault(new ObjectCreationExpression()))
-            .AddMember(Event(DataType.FromType<Action<string>?>(), "OnCultureChanged").Public.Static);
+        var classDeclaration = Class("Localization").Public.Static.Partial;
 
         foreach (var keyValuePair in mainObject)
         {
@@ -132,7 +122,8 @@ public class LocalizationGenerator : IIncrementalGenerator
             {
                 var method = Method(methodName, new(DataType.String)).Private.Static;
 
-                var switchStatement = new SwitchStatement("Culture".ToSimpleName());
+                var switchStatement =
+                    new SwitchStatement("global::TedToolkit.Localizations.LocalizationSettings.Culture".ToSimpleName());
 
                 foreach (var keyValuePair in otherKeys)
                 {
@@ -152,7 +143,8 @@ public class LocalizationGenerator : IIncrementalGenerator
                 table.AddItem(new DescriptionText("default"), new DescriptionText(ToDescription(stringValue)));
                 switchStatement.AddSection(new SwitchSection()
                     .AddLabel(new SwitchLabel())
-                    .AddStatement("LocalizedStrings.TryGetValue".ToSimpleName().Invoke()
+                    .AddStatement("global::TedToolkit.Localizations.LocalizationSettings.LocalizedStrings.TryGetValue"
+                        .ToSimpleName().Invoke()
                         .AddArgument(Argument(totalKey.ToLiteral()))
                         .AddArgument(Argument(new VariableExpression(DataType.Var, "value")).Out).If
                         .AddStatement("@value".ToSimpleName().Return))

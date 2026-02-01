@@ -1,5 +1,5 @@
 {
-  "Hello" : "Nice to meet {{You}}!",
+  "Hello" : "Nice to meet '{{You}}'!",
   "Sub" : {
     "Nice" : "Great!\nThanks!"
   }
