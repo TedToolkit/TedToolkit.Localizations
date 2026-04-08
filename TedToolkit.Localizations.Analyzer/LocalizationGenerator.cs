@@ -27,7 +27,8 @@ using static TedToolkit.RoslynHelper.Generators.SourceComposer<
 namespace TedToolkit.Localizations.Analyzer;
 
 /// <summary>
-/// Generate the localization File.
+/// Incremental source generator that reads <c>Localization*.json</c> additional files
+/// and emits a strongly-typed <c>Localization</c> class with culture-aware string lookups.
 /// </summary>
 [Generator(LanguageNames.CSharp)]
 public class LocalizationGenerator : IIncrementalGenerator
@@ -35,9 +36,11 @@ public class LocalizationGenerator : IIncrementalGenerator
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // Use the consuming assembly's name as the generated namespace
         var assemblyNameProvider = context.CompilationProvider
             .Select((compilation, _) => compilation.AssemblyName ?? "TedToolkit.Localizations");
 
+        // Collect all Localization*.json additional files
         var jsonFiles = context.AdditionalTextsProvider
             .Where(file =>
             {
@@ -50,10 +53,17 @@ public class LocalizationGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(jsonFiles.Combine(assemblyNameProvider), Generate);
     }
 
+    /// <summary>
+    /// Parses all JSON files, groups them by culture, and emits the <c>Localization</c> class.
+    /// </summary>
+    /// <param name="context">The source production context for reporting diagnostics and adding sources.</param>
+    /// <param name="item">A tuple of collected JSON additional texts and the target namespace (assembly name).</param>
     private static void Generate(SourceProductionContext context,
         (ImmutableArray<AdditionalText> Left, string Right) item)
     {
         var (files, nameSpace) = item;
+
+        // Parse each JSON file and key it by culture code ("" for the base file)
         var dict = new Dictionary<string, JObject>();
         foreach (var additionalText in files)
         {
@@ -62,16 +72,23 @@ public class LocalizationGenerator : IIncrementalGenerator
 
             var jsonString = additionalText.GetText(context.CancellationToken)?.ToString();
             if (jsonString is null)
+            {
                 continue;
+            }
 
             if (JsonConvert.DeserializeObject(jsonString) is not JObject jsonObject)
+            {
                 continue;
+            }
 
             dict[culture] = jsonObject;
         }
 
+        // The base Localization.json (culture "") is required
         if (!dict.TryGetValue("", out var mainObject))
+        {
             return;
+        }
 
         dict.Remove("");
 
@@ -91,6 +108,15 @@ public class LocalizationGenerator : IIncrementalGenerator
             .Generate(context, "Localization");
     }
 
+    /// <summary>
+    /// Recursively processes a JSON key-value pair and appends the corresponding member
+    /// (nested class, property, or method) to <paramref name="declaration"/>.
+    /// </summary>
+    /// <param name="declaration">The parent type declaration to add the member to.</param>
+    /// <param name="key">The current JSON key (used as the member name).</param>
+    /// <param name="totalKey">The dot-separated full path from root (e.g. <c>"Sub.Nice"</c>), used for runtime override lookups.</param>
+    /// <param name="value">The JSON value from the base translation file.</param>
+    /// <param name="otherKeys">Culture-specific values for this key, keyed by culture code.</param>
     private static void AppendMember(
         TypeDeclaration declaration,
         string key,
@@ -98,6 +124,7 @@ public class LocalizationGenerator : IIncrementalGenerator
         JToken? value,
         Dictionary<string, JToken?> otherKeys)
     {
+        // Nested JSON objects become nested static classes
         if (value is JObject jObject)
         {
             var subType = Class(key).Public.Static;
@@ -118,6 +145,7 @@ public class LocalizationGenerator : IIncrementalGenerator
             AddGetMethod();
             AddMethodOrProperty();
 
+            // Emits a private Get{Key}() method with a switch on Culture for locale resolution
             void AddGetMethod()
             {
                 var method = Method(methodName, new(DataType.String)).Private.Static;
@@ -154,6 +182,7 @@ public class LocalizationGenerator : IIncrementalGenerator
                     .AddStatement(switchStatement));
             }
 
+            // Emits the public-facing member: a property for plain strings, a method for parameterized strings
             void AddMethodOrProperty()
             {
                 var summary = new DescriptionSummary(
@@ -195,8 +224,17 @@ public class LocalizationGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>
+    /// Matches <c>{{parameter}}</c> placeholders in translation strings.
+    /// </summary>
     private static readonly Regex _argumentRegex = new(@"\{\{(.*?)\}\}");
 
+    /// <summary>
+    /// Converts <c>{{param}}</c> placeholders to XML doc markup (<c>&lt;c&gt;&lt;b&gt;param&lt;/b&gt;&lt;/c&gt;</c>).
+    /// </summary>
+    /// <param name="value">The raw translation string containing <c>{{placeholder}}</c> tokens.</param>
     private static string ToDescription(string value)
-        => value.Replace("{{", "<c><b>").Replace("}}", "</b></c>");
+    {
+        return value.Replace("{{", "<c><b>").Replace("}}", "</b></c>");
+    }
 }
