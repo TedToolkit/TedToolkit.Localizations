@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\externals\TedToolkit\props\CodeAnalysis.props"/>
-  <Import Project="..\externals\TedToolkit\props\NugetPackage.props"/>
-  <Import Project="..\externals\TedToolkit\props\AlmostAllFrameworks.props"/>
+  <Import Project="CodeAnalysis.props" Sdk="TedToolkit.Build.Sdk"/>
+  <Import Project="NugetPackage.props" Sdk="TedToolkit.Build.Sdk"/>
+  <Import Project="AlmostAllFrameworks.props" Sdk="TedToolkit.Build.Sdk"/>
 
   <PropertyGroup>
     <Title>Localizations</Title>
