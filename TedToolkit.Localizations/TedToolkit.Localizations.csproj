@@ -17,4 +17,9 @@
     <None Include="..\TedToolkit.Localizations.Analyzer\bin\$(Configuration)\netstandard2.0\ZString.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
     <None Include="..\TedToolkit.Localizations.Analyzer\bin\$(Configuration)\netstandard2.0\System.Memory.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../.agents/skills/generate-typed-localizations/**/*"
+          Pack="true" PackagePath="skills/generate-typed-localizations/" />
+  </ItemGroup>
 </Project>
